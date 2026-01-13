@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Klasmen Group C Tim Kethink</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background:#111;
+    color:#fff;
+    padding:20px;
+}
+table {
+    border-collapse: collapse;
+    width:100%;
+    margin-bottom:30px;
+}
+th, td {
+    border:1px solid #555;
+    padding:8px;
+    text-align:center;
+}
+th {
+    background:#222;
+}
+.mainstage {
+    background:#1e7f3a;
+    font-weight:bold;
+}
+input {
+    width:40px;
+}
+button {
+    padding:8px 16px;
+    cursor:pointer;
+    font-weight:bold;
+}
+h1, h2 {
+    margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Klasmen Group C – Tim Kethink</h1>
+
+<table id="standings">
+<thead>
+<tr>
+<th>Rank</th>
+<th>Team</th>
+<th>MW</th>
+<th>ML</th>
+<th>MR</th>
+<th>GW</th>
+<th>GL</th>
+<th>GR</th>
+<th>Point</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<h2>## Hasil Match Group Kethink</h2>
+
+<table id="matches">
+<thead>
+<tr>
+<th>Match</th>
+<th>Score</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Wargavi48 vs Kath.Inc</td><td><input> : <input></td></tr>
+<tr><td>Muffin vs Chelsealand</td><td><input> : <input></td></tr>
+<tr><td>Kath.Inc vs Muffin</td><td><input> : <input></td></tr>
+<tr><td>Humaniora vs Chelsealand</td><td><input> : <input></td></tr>
+<tr><td>Wargavi48 vs Humaniora</td><td><input> : <input></td></tr>
+<tr><td>Chelsealand vs Kath.Inc</td><td><input> : <input></td></tr>
+<tr><td>Kath.Inc vs Humaniora</td><td><input> : <input></td></tr>
+<tr><td>Muffin vs Wargavi48</td><td><input> : <input></td></tr>
+<tr><td>Humaniora vs Muffin</td><td><input> : <input></td></tr>
+<tr><td>Chelsealand vs Wargavi48</td><td><input> : <input></td></tr>
+</tbody>
+</table>
+
+<button onclick="updateStandings()">Update Klasemen</button>
+
+<script>
+const teams = [
+    "Kath.Inc",
+    "Muffin",
+    "Humaniora",
+    "Chelsealand",
+    "Wargavi48"
+];
+
+// INIT DATA (INI KUNCI BIAR 0-0 MUNCUL)
+let data = {};
+teams.forEach(t => {
+    data[t] = {
+        MW:0, ML:0, GW:0, GL:0, Point:0
+    };
+});
+
+renderTable();
+
+function updateStandings() {
+    // reset data
+    teams.forEach(t => {
+        data[t] = { MW:0, ML:0, GW:0, GL:0, Point:0 };
+    });
+
+    document.querySelectorAll("#matches tbody tr").forEach(row => {
+        const [teamA, teamB] = row.cells[0].innerText.split(" vs ");
+        const a = parseInt(row.cells[1].children[0].value);
+        const b = parseInt(row.cells[1].children[1].value);
+
+        if (isNaN(a) || isNaN(b)) return;
+
+        data[teamA].GW += a;
+        data[teamA].GL += b;
+        data[teamB].GW += b;
+        data[teamB].GL += a;
+
+        if (a > b) {
+            data[teamA].MW++;
+            data[teamA].Point += 3;
+            data[teamB].ML++;
+        } else {
+            data[teamB].MW++;
+            data[teamB].Point += 3;
+            data[teamA].ML++;
+        }
+    });
+
+    renderTable();
+}
+
+function renderTable() {
+    const tbody = document.querySelector("#standings tbody");
+    tbody.innerHTML = "";
+
+    let sorted = Object.entries(data).sort((a,b) =>
+        b[1].Point - a[1].Point ||
+        (b[1].GW - b[1].GL) - (a[1].GW - a[1].GL)
+    );
+
+    sorted.forEach((item, i) => {
+        const [team, s] = item;
+        const tr = document.createElement("tr");
+        if (i < 2) tr.classList.add("mainstage");
+
+        tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>${team}</td>
+        <td>${s.MW}</td>
+        <td>${s.ML}</td>
+        <td>${s.MW + s.ML === 0 ? "0%" : Math.round(s.MW/(s.MW+s.ML)*100)+"%"}</td>
+        <td>${s.GW}</td>
+        <td>${s.GL}</td>
+        <td>${s.GW + s.GL === 0 ? "0%" : Math.round(s.GW/(s.GW+s.GL)*100)+"%"}</td>
+        <td>${s.Point}</td>
+        <td>${i < 2 ? "Lolos Mainstage" : "-"}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+</script>
+
+</body>
+</html>
